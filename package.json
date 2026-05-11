@@ -1,0 +1,29 @@
+{
+  "name": "tabbrew-skill",
+  "version": "0.1.0",
+  "description": "Safe declarative DSL for Chrome tab management + Claude skill that translates natural language into executable scripts.",
+  "license": "MIT",
+  "author": "Jiho",
+  "homepage": "https://github.com/colevels/tabbrew-skill",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/colevels/tabbrew-skill.git"
+  },
+  "keywords": [
+    "chrome-extension",
+    "tab-management",
+    "claude",
+    "claude-skill",
+    "agent",
+    "dsl",
+    "tabbrew"
+  ],
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "typescript": "^5.4.0"
+  }
+}
