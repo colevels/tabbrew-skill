@@ -1,6 +1,6 @@
 ---
 name: tabbrew
-description: Translate a Chrome tab snapshot + a natural-language goal into an executable TabBrew Script. Use this for any TabBrew Script task — generating, debugging, or extending. Trigger on natural-language Chrome tab-management goals such as "organize my tabs", "close all YouTube tabs", "group my Chrome tabs by domain", "pin/unpin/move/delete tabs", "clean up duplicate tabs", "ungroup tabs", or any mention of a "TabBrew script". Also trigger on any verb-based intent (organize, clean up, categorize, pin, unpin, move, close, delete, group, ungroup) targeting Chrome tabs.
+description: TabBrew Script generator — produces a script to manage Chrome tabs from a natural-language goal, e.g. "organize my tabs", "group tabs by domain", or any "TabBrew script" request.
 ---
 
 # TabBrew Script Generator

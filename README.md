@@ -2,7 +2,7 @@
 
 A safe, declarative DSL for Chrome tab management — paired with a Claude skill that translates plain English (or any language) into executable scripts.
 
-This is the open-source extraction of the agentic tab-management primitive used inside [TabBrew](https://tabbrew.com). Six verbs, no `eval`, no JavaScript sandbox — just a small text language that maps 1:1 onto Chrome's `chrome.tabs.*` and `chrome.tabGroups.*` APIs.
+This is the open-source extraction of the agentic tab-management primitive used inside [TabBrew](https://tabbrew.com). Six verbs, no arbitrary code execution — just a small text language that maps 1:1 onto Chrome's `chrome.tabs.*` and `chrome.tabGroups.*` APIs.
 
 ## What's in the repo
 
@@ -68,7 +68,7 @@ console.log(result.phases)
 
 Want a dry-run first? Use `simulateBatch(payload, ops)` — returns the predicted post-execution state without touching Chrome.
 
-## Why a DSL instead of `eval`
+## Why a DSL instead of raw JavaScript
 
 A Claude/agent flow that runs raw JavaScript inside an extension is one prompt injection away from `chrome.tabs.remove(everything)`. TabBrew Script trades expressiveness for safety:
 
