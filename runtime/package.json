@@ -1,6 +1,6 @@
 {
   "name": "tabbrew-skill",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Safe declarative DSL for Chrome tab management + Claude skill that translates natural language into executable scripts.",
   "license": "MIT",
   "author": "Jiho",

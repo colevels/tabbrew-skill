@@ -1,6 +1,6 @@
 ---
 name: tabbrew
-description: TabBrew Script generator — produces a script to manage Chrome tabs from a natural-language goal, e.g. "organize my tabs", "group tabs by domain", or any "TabBrew script" request.
+description: Manage Chrome tabs with TabBrew Scripts. Just say what you want — "tidy up my tabs", "close duplicates", or "group my shopping tabs together".
 ---
 
 # TabBrew Script Generator
