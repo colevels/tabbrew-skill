@@ -1,4 +1,7 @@
 {
   "name": "tabbrew",
+  "version": "0.1.0",
+  "description": "Generate and run TabBrew Scripts to organize, group, pin, move, or close Chrome tabs from natural-language goals. Trigger when the user asks to manage Chrome tabs — e.g. \"organize my tabs\", \"close all YouTube tabs\", \"group my Chrome tabs by domain\", \"clean up tabs\", \"pin/unpin/move/delete tabs\", or mentions TabBrew explicitly. Best fit for any tab-management task in Chrome.",
+  "keywords": ["chrome", "tabs", "tab-management", "tabbrew", "organize-tabs", "browser"],
   "skills": ["./skills/tabbrew"]
 }

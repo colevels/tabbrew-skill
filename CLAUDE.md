@@ -71,6 +71,19 @@ The snapshotter deliberately excludes the tab hosting the extension page itself 
 
 The `crossWindow` snapshot option (and the corresponding `# Cross-window: yes|no` header in the rendered snapshot) gates `MOVE ... @win=<wid>`. When `no`, the snapshot only contains the focused window's tabs and the skill must not emit `@win=`. A Chrome tab group can never span windows, so `GROUP @<gid>` always requires the listed tabs to already be in the group's window — phase order means you can't pre-position with MOVE in the same script.
 
+## Plugin discoverability
+
+When this plugin is *not* installed, hosts like Cowork decide whether to suggest it (via `suggest_plugin_install`) by string-matching the user's message against two fields:
+
+1. `description` in `.claude-plugin/plugin.json` — read by the plugin host before any skill is loaded.
+2. `description` in the YAML frontmatter of `skills/tabbrew/SKILL.md` — read by Claude when deciding whether to load the skill on-demand.
+
+Both fields are kept deliberately phrase-heavy: they list the concrete things a user would actually type ("organize my tabs", "close all YouTube tabs", "group my Chrome tabs by domain", "TabBrew script") rather than a clean abstract summary. Generic descriptions like "manages Chrome tabs" don't match real user phrasings and the plugin stays invisible. The verb list (organize / clean up / categorize / pin / unpin / move / close / delete / group / ungroup) is duplicated in both fields on purpose — matchers don't share state across files.
+
+`keywords` in `plugin.json` (`chrome`, `tabs`, `tab-management`, `tabbrew`, `organize-tabs`, `browser`) is a secondary signal used by some hosts. Keep it short and intent-flavored, not feature-flavored.
+
+When changing either description, run `claude plugin validate .claude-plugin/plugin.json` from the repo root. One warning is expected and by design: CLAUDE.md sits at the plugin root and is *not* shipped as plugin context — it's for contributors editing this repo. Skill consumers only see `skills/tabbrew/SKILL.md`.
+
 ## When editing
 
 - **Adding a verb**: touch `runtime/src/types.ts`, `runtime/src/parser.ts`, `runtime/src/execute.ts`, `runtime/src/simulate.ts`, `docs/grammar.md`, `skills/tabbrew/SKILL.md`'s grammar table, and add an example to `skills/tabbrew/examples.md`. Decide where it fits in the phase order — that decision is the design.
