@@ -7,11 +7,12 @@ This is the open-source extraction of the agentic tab-management primitive used 
 ## What's in the repo
 
 ```
-SKILL.md            # Claude skill — drop into ~/.claude/skills/tabbrew/
-examples/README.md  # 24 worked goal → script pairs covering every verb + edge case
-src/                # TypeScript runtime: parse / execute / simulate / snapshot
-docs/grammar.md     # Formal language reference
-docs/runtime.md     # Phased execution model + safety properties
+.claude-plugin/plugin.json   # Claude Code plugin manifest
+skills/tabbrew/SKILL.md      # Claude skill — drop into ~/.claude/skills/tabbrew/
+skills/tabbrew/examples.md   # 24 worked goal → script pairs covering every verb + edge case
+runtime/src/                 # TypeScript runtime: parse / execute / simulate / snapshot
+docs/grammar.md              # Formal language reference
+docs/runtime.md              # Phased execution model + safety properties
 ```
 
 ## The script language at a glance
@@ -30,24 +31,24 @@ MOVE 500 -1 @win=2                # move to end of window 2 (cross-window)
 ```
 
 Full grammar: [docs/grammar.md](docs/grammar.md).
-24 worked examples: [examples/README.md](examples/README.md).
+24 worked examples: [skills/tabbrew/examples.md](skills/tabbrew/examples.md).
 
 ## Quick start — use the Claude skill
 
 1. `git clone https://github.com/colevels/tabbrew-skill.git`
-2. Copy `SKILL.md` into Claude's skill directory:
+2. Copy the skill folder into Claude's skill directory:
 
    ```bash
-   mkdir -p ~/.claude/skills/tabbrew
-   cp tabbrew-skill/SKILL.md ~/.claude/skills/tabbrew/SKILL.md
-   cp tabbrew-skill/examples/README.md ~/.claude/skills/tabbrew/examples.md
+   cp -r tabbrew-skill/skills/tabbrew ~/.claude/skills/
    ```
+
+   The repo is also a Claude Code plugin (`.claude-plugin/plugin.json`), so plugin-aware installers can load it directly from the repo root.
 
 3. In a chat, paste a snapshot of your Chrome state (matching the input format in `SKILL.md`) with a `# Goal` line. Claude returns one fenced `\`\`\`tabbrew ... \`\`\`` block.
 
 ## Quick start — run scripts inside a Chrome extension
 
-`src/` is plain TypeScript with `@types/chrome` as the only runtime dependency. Copy the files you need into your extension's source tree.
+`runtime/src/` is plain TypeScript with `@types/chrome` as the only runtime dependency. Copy the files you need into your extension's source tree.
 
 ```ts
 import { snapshotCurrentWindow, parseTabbrewScript, executeBatch } from './tabbrew-skill'
