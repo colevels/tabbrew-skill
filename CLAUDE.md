@@ -11,6 +11,8 @@ Two artifacts shipped together as one package:
 1. **`skills/tabbrew/SKILL.md`** (+ `examples.md`) — a Claude skill that translates a Chrome tab snapshot + a natural-language goal into a TabBrew Script. This is a contract document, not code: the wording is load-bearing because real users invoke this skill behind a one-shot HTTP API.
 2. **`runtime/src/`** — the TypeScript runtime that *executes* those scripts inside a Chrome extension (parser → simulator → executor). Plain TS with `@types/chrome` as the only runtime dependency; designed to be copied into a host extension's source tree, not consumed as an npm package (`"private": true`).
 
+`runtime/src/index.ts` is the public export barrel — `parseTabbrewScript`, `executeBatch`, `simulateBatch`, `snapshotCurrentWindow`, `compactUrl`, `stripCountPrefix`, plus all public types. Adding a new top-level function for consumers means touching this file; adding a verb does not (the public surface stays the same).
+
 The two are tightly coupled — the skill emits a DSL the runtime parses. Changes to verbs/grammar must land in `skills/tabbrew/SKILL.md`, `docs/grammar.md`, `skills/tabbrew/examples.md`, and `runtime/src/parser.ts` + `runtime/src/execute.ts` + `runtime/src/simulate.ts` in lockstep, or the model and the executor disagree.
 
 ## Commands
