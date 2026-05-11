@@ -35,6 +35,14 @@ Full grammar: [docs/grammar.md](docs/grammar.md).
 
 ## Quick start — use the Claude skill
 
+The fastest way is the [skills.sh](https://skills.sh) installer — pick which agent (Claude Code, Codex, etc.) you want to install it on:
+
+```bash
+npx skills@latest add colevels/tabbrew-skill
+```
+
+Or install manually:
+
 1. `git clone https://github.com/colevels/tabbrew-skill.git`
 2. Copy the skill folder into Claude's skill directory:
 
