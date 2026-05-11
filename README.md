@@ -2,7 +2,7 @@
 
 A safe, declarative DSL for Chrome tab management — paired with a Claude skill that translates plain English (or any language) into executable scripts.
 
-This is the open-source extraction of the agentic tab-management primitive used inside [TabBrew](https://tabbrew.app). Six verbs, no `eval`, no JavaScript sandbox — just a small text language that maps 1:1 onto Chrome's `chrome.tabs.*` and `chrome.tabGroups.*` APIs.
+This is the open-source extraction of the agentic tab-management primitive used inside [TabBrew](https://tabbrew.com). Six verbs, no `eval`, no JavaScript sandbox — just a small text language that maps 1:1 onto Chrome's `chrome.tabs.*` and `chrome.tabGroups.*` APIs.
 
 ## What's in the repo
 
@@ -81,7 +81,7 @@ See [docs/runtime.md](docs/runtime.md) for the full execution model.
 
 ## TabBrew
 
-This primitive powers the agentic tab-management flow in [TabBrew](https://tabbrew.app), a Chrome extension that replaces the new-tab page with a programmable tab manager.
+This primitive powers the agentic tab-management flow in [TabBrew](https://tabbrew.com), a Chrome extension that replaces the new-tab page with a programmable tab manager.
 
 ## License
 
