@@ -4,21 +4,24 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
+Layout follows the [mattpocock/skills](https://github.com/mattpocock/skills) Claude Code plugin convention: `.claude-plugin/plugin.json` declares the plugin, skills live under `skills/<name>/`, and the TypeScript runtime is a sibling under `runtime/`.
+
 Two artifacts shipped together as one package:
 
-1. **`SKILL.md`** — a Claude skill that translates a Chrome tab snapshot + a natural-language goal into a TabBrew Script. This is a contract document, not code: the wording is load-bearing because real users invoke this skill behind a one-shot HTTP API.
-2. **`src/`** — the TypeScript runtime that *executes* those scripts inside a Chrome extension (parser → simulator → executor). Plain TS with `@types/chrome` as the only runtime dependency; designed to be copied into a host extension's source tree, not consumed as an npm package (`"private": true`).
+1. **`skills/tabbrew/SKILL.md`** (+ `examples.md`) — a Claude skill that translates a Chrome tab snapshot + a natural-language goal into a TabBrew Script. This is a contract document, not code: the wording is load-bearing because real users invoke this skill behind a one-shot HTTP API.
+2. **`runtime/src/`** — the TypeScript runtime that *executes* those scripts inside a Chrome extension (parser → simulator → executor). Plain TS with `@types/chrome` as the only runtime dependency; designed to be copied into a host extension's source tree, not consumed as an npm package (`"private": true`).
 
-The two are tightly coupled — the skill emits a DSL the runtime parses. Changes to verbs/grammar must land in both `SKILL.md`, `docs/grammar.md`, `examples/README.md`, and `src/parser.ts` + `src/execute.ts` + `src/simulate.ts` in lockstep, or the model and the executor disagree.
+The two are tightly coupled — the skill emits a DSL the runtime parses. Changes to verbs/grammar must land in `skills/tabbrew/SKILL.md`, `docs/grammar.md`, `skills/tabbrew/examples.md`, and `runtime/src/parser.ts` + `runtime/src/execute.ts` + `runtime/src/simulate.ts` in lockstep, or the model and the executor disagree.
 
 ## Commands
 
 ```bash
+cd runtime
 npm install        # one-time
 npm run typecheck  # tsc --noEmit; the only check this repo runs
 ```
 
-No tests, no lint, no build step (consumers compile the `.ts` files in their own extension). The `tsconfig.json` `outDir: dist` exists only so `tsc` is happy — `dist/` isn't shipped.
+The `package.json` lives in `runtime/`, so all npm commands run from there. No tests, no lint, no build step (consumers compile the `.ts` files in their own extension). The `tsconfig.json` `outDir: dist` exists only so `tsc` is happy — `dist/` isn't shipped.
 
 ## Architecture
 
@@ -28,7 +31,7 @@ No tests, no lint, no build step (consumers compile the `.ts` files in their own
 
 ### Phased execution is the non-obvious part
 
-`executeBatch` in `src/execute.ts` ignores the order of ops in the script and re-groups them into a fixed phase order:
+`executeBatch` in `runtime/src/execute.ts` ignores the order of ops in the script and re-groups them into a fixed phase order:
 
 ```
 DEL → UNPIN → UNGROUP → GROUP → PIN → MOVE
@@ -43,7 +46,7 @@ This order is not arbitrary — it's chosen so each phase leaves tab indices and
 
 **Consequence for the model contract**: the skill must compute `MOVE` indices against the *post-non-MOVE* state, not the original snapshot. This is documented in `SKILL.md` rule 2 — don't loosen that wording without re-deriving why the phase order works.
 
-**Consequence for the runtime**: `simulate.ts` mirrors the exact same phase order so previews match what Chrome will actually render. If you change one, change both.
+**Consequence for the runtime**: `runtime/src/simulate.ts` mirrors the exact same phase order so previews match what Chrome will actually render. If you change one, change both.
 
 ### Coalescing and bucketing
 
@@ -56,7 +59,7 @@ Before any phase runs, `executeBatch` calls `chrome.tabs.query({})` to enumerate
 
 ### Snapshot format
 
-`snapshotCurrentWindow` in `src/snapshot.ts` produces both a **markdown string** (what the model sees) and a **typed payload** (what `simulateBatch` consumes). The string format — sections in order `# Goal`, `# Cross-window: yes|no`, `# Windows`, `# Groups`, `# Tabs` with JSONL bodies — is the contract `SKILL.md` is written against. The "optional field absence" convention (`pinned`/`active`/`focused`/`groupId`/`color` omitted when false/undefined) shrinks input tokens and is documented in `SKILL.md` §Input format.
+`snapshotCurrentWindow` in `runtime/src/snapshot.ts` produces both a **markdown string** (what the model sees) and a **typed payload** (what `simulateBatch` consumes). The string format — sections in order `# Goal`, `# Cross-window: yes|no`, `# Windows`, `# Groups`, `# Tabs` with JSONL bodies — is the contract `SKILL.md` is written against. The "optional field absence" convention (`pinned`/`active`/`focused`/`groupId`/`color` omitted when false/undefined) shrinks input tokens and is documented in `SKILL.md` §Input format.
 
 The snapshotter deliberately excludes the tab hosting the extension page itself (newtab, popup, sidepanel, etc.) — otherwise the model can plan ops against the very tab running the executor.
 
@@ -68,6 +71,6 @@ The `crossWindow` snapshot option (and the corresponding `# Cross-window: yes|no
 
 ## When editing
 
-- **Adding a verb**: touch `src/types.ts`, `src/parser.ts`, `src/execute.ts`, `src/simulate.ts`, `docs/grammar.md`, `SKILL.md`'s grammar table, and add an example to `examples/README.md`. Decide where it fits in the phase order — that decision is the design.
-- **Changing snapshot output**: the markdown string and the JSONL field set are the model's input contract. Update `SKILL.md` §Input format in the same change, otherwise the model's parsing assumptions drift.
-- **Changing phase order**: update `execute.ts`, `simulate.ts`, `docs/runtime.md`, and `SKILL.md` rule 2 together.
+- **Adding a verb**: touch `runtime/src/types.ts`, `runtime/src/parser.ts`, `runtime/src/execute.ts`, `runtime/src/simulate.ts`, `docs/grammar.md`, `skills/tabbrew/SKILL.md`'s grammar table, and add an example to `skills/tabbrew/examples.md`. Decide where it fits in the phase order — that decision is the design.
+- **Changing snapshot output**: the markdown string and the JSONL field set are the model's input contract. Update `skills/tabbrew/SKILL.md` §Input format in the same change, otherwise the model's parsing assumptions drift.
+- **Changing phase order**: update `runtime/src/execute.ts`, `runtime/src/simulate.ts`, `docs/runtime.md`, and `skills/tabbrew/SKILL.md` rule 2 together.
