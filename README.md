@@ -91,6 +91,10 @@ See [docs/runtime.md](docs/runtime.md) for the full execution model.
 
 This primitive powers the agentic tab-management flow in [TabBrew](https://tabbrew.com), a Chrome extension that replaces the new-tab page with a programmable tab manager.
 
+## Author
+
+Built by [@colevels](https://x.com/colevels).
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
