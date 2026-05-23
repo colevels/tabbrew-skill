@@ -15,9 +15,8 @@
     "skipLibCheck": true,
     "isolatedModules": true,
     "declaration": true,
-    "outDir": "dist",
-    "rootDir": "src"
+    "outDir": "dist"
   },
-  "include": ["src"],
+  "include": ["src", "tests", "vitest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }
