@@ -12,6 +12,9 @@ const safeRun = async (phase: string, label: string, affectedIds: number[], fn: 
 
 type MoveOp = { id: number; index: number; windowId?: number }
 
+const nonEmpty = <T,>(arr: T[]): [T, ...T[]] | null =>
+  arr.length > 0 ? (arr as [T, ...T[]]) : null
+
 export const executeBatch = async (ops: Op[]): Promise<ExecuteResult> => {
   // Snapshot the live tab id set up-front so we can drop stale ids that the
   // generator emitted before the user clicked Run. Without this, a single
@@ -88,15 +91,18 @@ export const executeBatch = async (ops: Op[]): Promise<ExecuteResult> => {
     )
   }
 
-  if (ungroups.length) {
-    phases.push(await safeRun('UNGROUP', `ungrouped ${ungroups.length} tab(s)`, ungroups, () => chrome.tabs.ungroup(ungroups)))
+  const ungroupTuple = nonEmpty(ungroups)
+  if (ungroupTuple) {
+    phases.push(await safeRun('UNGROUP', `ungrouped ${ungroups.length} tab(s)`, ungroups, () => chrome.tabs.ungroup(ungroupTuple)))
   }
 
   const namedGroupEntries = Array.from(groupsByName.entries())
   for (const [name, ids] of namedGroupEntries) {
+    const tabIds = nonEmpty(ids)
+    if (!tabIds) continue
     phases.push(
       await safeRun('GROUP', `"${name}" ← ${ids.length} tab(s)`, ids, async () => {
-        const gid = await chrome.tabs.group({ tabIds: ids })
+        const gid = await chrome.tabs.group({ tabIds })
         await chrome.tabGroups.update(gid, { title: name })
       })
     )
@@ -104,9 +110,11 @@ export const executeBatch = async (ops: Op[]): Promise<ExecuteResult> => {
 
   const reuseGroupEntries = Array.from(groupsByGid.entries())
   for (const [gid, ids] of reuseGroupEntries) {
+    const tabIds = nonEmpty(ids)
+    if (!tabIds) continue
     phases.push(
       await safeRun('GROUP', `@${gid} ← ${ids.length} tab(s)`, ids, async () => {
-        await chrome.tabs.group({ groupId: gid, tabIds: ids })
+        await chrome.tabs.group({ groupId: gid, tabIds })
       })
     )
   }

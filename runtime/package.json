@@ -1,9 +1,12 @@
 {
   "name": "tabbrew-skill",
-  "version": "0.1.2",
-  "description": "Safe declarative DSL for Chrome tab management + Claude skill that translates natural language into executable scripts.",
+  "version": "0.1.3",
+  "description": "Manage Chrome tabs with TabBrew Scripts. Just say what you want — tidy up my tabs, close duplicates, or group my shopping tabs together.",
   "license": "MIT",
-  "author": "Jiho",
+  "author": {
+    "name": "Jiho",
+    "url": "https://x.com/colevels"
+  },
   "homepage": "https://github.com/colevels/tabbrew-skill",
   "repository": {
     "type": "git",
@@ -23,7 +26,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.268",
-    "typescript": "^5.4.0"
+    "@types/chrome": "^0.1.42",
+    "typescript": "^6.0.3"
   }
 }
