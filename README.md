@@ -1,23 +1,71 @@
 # tabbrew-skill
 
-A safe, declarative DSL for Chrome tab management — paired with a Claude skill that translates plain English (or any language) into executable scripts.
+**Organize your Chrome tabs by just telling Claude what you want.**
 
-This is the open-source extraction of the agentic tab-management primitive used inside [TabBrew](https://tabbrew.com). Six verbs, no arbitrary code execution — just a small text language that maps 1:1 onto Chrome's `chrome.tabs.*` and `chrome.tabGroups.*` APIs.
+"Close all my YouTube tabs." "Group everything by website." "Pin my email and tidy up the rest." You say it in plain language — Claude figures out exactly which tabs to close, pin, group, or move, and it happens safely.
 
-## What's in the repo
+> 🧩 Works with the **[TabBrew — Tab Manager & Organizer](https://chromewebstore.google.com/detail/tabbrew-tab-manager-organ/ikmpmkkcmhhnjmdiooekbhfmomcbefkf)** Chrome extension — install it from the Chrome Web Store to run these on your real tabs in one click.
+
+## How it works
+
+You tell Claude your goal. Behind the scenes it writes a short, safe script using just six simple actions — **close, pin, unpin, group, ungroup, move** — and nothing else. No arbitrary code runs in your browser, so there's no way for it to do something you didn't ask for.
+
+```
+You:    "close all youtube tabs and group the rest by site"
+Claude: DEL 123 456        ← closes the YouTube tabs
+        GROUP 200 201 "Docs"
+        GROUP 300 301 "Shopping"
+```
+
+That little script maps directly onto Chrome's own tab controls — one line, one action.
+
+## Get started
+
+### Use it with Claude
+
+The quickest way — pick your agent (Claude Code, Codex, etc.) and install:
+
+```bash
+npx skills@latest add colevels/tabbrew-skill
+```
+
+Prefer to install by hand?
+
+1. `git clone https://github.com/colevels/tabbrew-skill.git`
+2. Copy the skill into Claude's skills folder:
+
+   ```bash
+   cp -r tabbrew-skill/skills/tabbrew ~/.claude/skills/
+   ```
+
+   It's also a Claude Code plugin, so plugin-aware installers can load it straight from the repo.
+
+3. Tell Claude what you want done with your tabs — it does the rest.
+
+### Run it on your live tabs
+
+The easiest path is the **[TabBrew Chrome extension](https://chromewebstore.google.com/detail/tabbrew-tab-manager-organ/ikmpmkkcmhhnjmdiooekbhfmomcbefkf)** — it already has the skill built in. Just install it and start asking.
+
+## Safe by design
+
+Lots of AI browser tools work by running raw code in your browser, which is one bad prompt away from closing every tab you have. TabBrew doesn't do that. It only ever does six things — close, pin, unpin, group, ungroup, move — and anything outside that is rejected before it runs. You always get exactly what you asked for, nothing more.
+
+---
+
+## For developers
+
+The pieces above are open source. Here's how the repo is laid out:
 
 ```
 .claude-plugin/plugin.json   # Claude Code plugin manifest
-skills/tabbrew/SKILL.md      # Claude skill — drop into ~/.claude/skills/tabbrew/
-skills/tabbrew/examples.md   # 24 worked goal → script pairs covering every verb + edge case
+skills/tabbrew/SKILL.md      # the Claude skill itself
+skills/tabbrew/examples.md   # 24 worked goal → script examples
 runtime/src/                 # TypeScript runtime: parse / execute / simulate / snapshot
-docs/grammar.md              # Formal language reference
-docs/runtime.md              # Phased execution model + safety properties
+docs/grammar.md              # formal language reference
+docs/runtime.md              # execution model + safety properties
 ```
 
-## The script language at a glance
-
-One verb per line. Lines starting with `#` are comments.
+**The script language** — one action per line, `#` for comments:
 
 ```tabbrew
 DEL 123 456                       # close tabs
@@ -30,38 +78,14 @@ MOVE 400 0                        # move tab to position 0
 MOVE 500 -1 @win=2                # move to end of window 2 (cross-window)
 ```
 
-Full grammar: [docs/grammar.md](docs/grammar.md).
-24 worked examples: [skills/tabbrew/examples.md](skills/tabbrew/examples.md).
+Full grammar: [docs/grammar.md](docs/grammar.md) · 24 examples: [skills/tabbrew/examples.md](skills/tabbrew/examples.md).
 
-## Quick start — use the Claude skill
-
-The fastest way is the [skills.sh](https://skills.sh) installer — pick which agent (Claude Code, Codex, etc.) you want to install it on:
-
-```bash
-npx skills@latest add colevels/tabbrew-skill
-```
-
-Or install manually:
-
-1. `git clone https://github.com/colevels/tabbrew-skill.git`
-2. Copy the skill folder into Claude's skill directory:
-
-   ```bash
-   cp -r tabbrew-skill/skills/tabbrew ~/.claude/skills/
-   ```
-
-   The repo is also a Claude Code plugin (`.claude-plugin/plugin.json`), so plugin-aware installers can load it directly from the repo root.
-
-3. In a chat, paste a snapshot of your Chrome state (matching the input format in `SKILL.md`) with a `# Goal` line. Claude returns one fenced `\`\`\`tabbrew ... \`\`\`` block.
-
-## Quick start — run scripts inside a Chrome extension
-
-`runtime/src/` is plain TypeScript with `@types/chrome` as the only runtime dependency. Copy the files you need into your extension's source tree.
+**Run scripts inside your own extension** — `runtime/src/` is plain TypeScript with `@types/chrome` as the only dependency. Copy in the files you need:
 
 ```ts
 import { snapshotCurrentWindow, parseTabbrewScript, executeBatch } from './tabbrew-skill'
 
-// 1. Capture current state to ship to the model
+// 1. Capture current state to send to the model
 const { snapshot, payload } = await snapshotCurrentWindow({ crossWindow: false })
 
 // 2. Send `snapshot` + user goal to your model → receive a tabbrew script
@@ -74,22 +98,13 @@ const result = await executeBatch(ops)
 console.log(result.phases)
 ```
 
-Want a dry-run first? Use `simulateBatch(payload, ops)` — returns the predicted post-execution state without touching Chrome.
+Want a dry-run first? `simulateBatch(payload, ops)` returns the predicted result without touching Chrome.
 
-## Why a DSL instead of raw JavaScript
-
-A Claude/agent flow that runs raw JavaScript inside an extension is one prompt injection away from `chrome.tabs.remove(everything)`. TabBrew Script trades expressiveness for safety:
-
-- Six verbs, fixed grammar — the parser rejects anything outside the spec
-- Each op maps to one concrete `chrome.tabs.*` / `chrome.tabGroups.*` call
-- Phased execution (`DEL → UNPIN → UNGROUP → GROUP → PIN → MOVE`) keeps tab indices valid mid-batch
-- Stale tab ids are filtered against `chrome.tabs.query()` before execution
-
-See [docs/runtime.md](docs/runtime.md) for the full execution model.
+Under the hood, actions run in a fixed safe order (`DEL → UNPIN → UNGROUP → GROUP → PIN → MOVE`) so tab positions stay valid mid-batch, and stale tab ids are filtered out before anything runs. See [docs/runtime.md](docs/runtime.md) for the full model.
 
 ## TabBrew
 
-This primitive powers the agentic tab-management flow in [TabBrew](https://tabbrew.com), a Chrome extension that replaces the new-tab page with a programmable tab manager.
+This powers the tab-management flow in [TabBrew](https://tabbrew.com), a Chrome extension that turns your new-tab page into a programmable tab manager.
 
 ## Author
 
