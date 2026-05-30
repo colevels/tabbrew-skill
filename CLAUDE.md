@@ -20,10 +20,16 @@ The two are tightly coupled — the skill emits a DSL the runtime parses. Change
 ```bash
 cd runtime
 npm install        # one-time
-npm run typecheck  # tsc --noEmit; the only check this repo runs
+npm run typecheck  # tsc --noEmit
+npm test           # vitest run — parser/simulate/execute/snapshot/url-utils suites
+npm run test:watch # vitest in watch mode
 ```
 
-The `package.json` lives in `runtime/`, so all npm commands run from there. No tests, no lint, no build step (consumers compile the `.ts` files in their own extension). The `tsconfig.json` `outDir: dist` exists only so `tsc` is happy — `dist/` isn't shipped.
+The `package.json` lives in `runtime/`, so all npm commands run from there. No lint, no build step (consumers compile the `.ts` files in their own extension). The `tsconfig.json` `outDir: dist` exists only so `tsc` is happy — `dist/` isn't shipped.
+
+### Tests
+
+Vitest specs live in `runtime/tests/` (`parser`, `simulate`, `execute`, `snapshot`, `url-utils`), configured by `runtime/vitest.config.ts` to include `tests/**/*.test.ts`. There is no real Chrome in the test environment, so `runtime/tests/setup.ts` installs a `globalThis.chrome` stub: `makeChromeStub({...})` builds a fully-mocked `chrome.tabs` / `chrome.tabGroups` / `chrome.windows` surface (all `vi.fn`), `installChromeStub` assigns it to the global, and a no-op baseline is installed at load so any module touching `chrome.*` at import time doesn't crash. `execute.test.ts` asserts against these mock call args to pin the phase order and coalescing/bucketing behavior; `snapshot.test.ts` uses shared fixtures from `tests/fixtures/snapshots.ts`.
 
 ## Architecture
 
@@ -86,6 +92,7 @@ When changing either description, run `claude plugin validate .claude-plugin/plu
 
 ## When editing
 
-- **Adding a verb**: touch `runtime/src/types.ts`, `runtime/src/parser.ts`, `runtime/src/execute.ts`, `runtime/src/simulate.ts`, `docs/grammar.md`, `skills/tabbrew/SKILL.md`'s grammar table, and add an example to `skills/tabbrew/examples.md`. Decide where it fits in the phase order — that decision is the design.
-- **Changing snapshot output**: the markdown string and the JSONL field set are the model's input contract. Update `skills/tabbrew/SKILL.md` §Input format in the same change, otherwise the model's parsing assumptions drift.
-- **Changing phase order**: update `runtime/src/execute.ts`, `runtime/src/simulate.ts`, `docs/runtime.md`, and `skills/tabbrew/SKILL.md` rule 2 together.
+- **Adding a verb**: touch `runtime/src/types.ts`, `runtime/src/parser.ts`, `runtime/src/execute.ts`, `runtime/src/simulate.ts`, `docs/grammar.md`, `skills/tabbrew/SKILL.md`'s grammar table, and add an example to `skills/tabbrew/examples.md`. Decide where it fits in the phase order — that decision is the design. Add coverage in `runtime/tests/parser.test.ts` and `runtime/tests/execute.test.ts`.
+- **Changing snapshot output**: the markdown string and the JSONL field set are the model's input contract. Update `skills/tabbrew/SKILL.md` §Input format in the same change, otherwise the model's parsing assumptions drift. Update `runtime/tests/snapshot.test.ts` and the `tests/fixtures/snapshots.ts` fixtures alongside.
+- **Changing phase order**: update `runtime/src/execute.ts`, `runtime/src/simulate.ts`, `docs/runtime.md`, and `skills/tabbrew/SKILL.md` rule 2 together. `runtime/tests/execute.test.ts` asserts the phase order against the Chrome mock — keep it in sync.
+- **Always run `npm test` and `npm run typecheck` from `runtime/` before considering a change done.**
