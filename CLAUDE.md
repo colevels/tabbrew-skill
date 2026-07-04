@@ -6,14 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Layout follows the [mattpocock/skills](https://github.com/mattpocock/skills) Claude Code plugin convention: `.claude-plugin/plugin.json` declares the plugin, skills live under `skills/<name>/`, and the TypeScript runtime is a sibling under `runtime/`.
 
-Two artifacts shipped together as one package:
+Three artifacts shipped together as one package:
 
 1. **`skills/tabbrew/SKILL.md`** (+ `examples.md`) — a Claude skill that translates a Chrome tab snapshot + a natural-language goal into a TabBrew Script. This is a contract document, not code: the wording is load-bearing because real users invoke this skill behind a one-shot HTTP API.
 2. **`runtime/src/`** — the TypeScript runtime that *executes* those scripts inside a Chrome extension (parser → simulator → executor). Plain TS with `@types/chrome` as the only runtime dependency; designed to be copied into a host extension's source tree, not consumed as an npm package (`"private": true`).
+3. **`skills/tabbrew-html-upload/SKILL.md`** — a standalone prose skill that `curl`s the tabbrew.com Docs API (`/api/v1/html_files/upload` and `/local`) to push an HTML doc into the extension's sidepanel Docs view. It has no coupling to the DSL/runtime. Cloud mode is the default on purpose — the Chrome Web Store build is cloud-only, and local mode (`file://` registration) only works on dev builds with "Allow access to file URLs" enabled; don't flip the default back to local without checking that. As with the tab skill, the main tabbrew repo is the source of truth for skill content (manual copy-out flow).
 
 `runtime/src/index.ts` is the public export barrel — `parseTabbrewScript`, `executeBatch`, `simulateBatch`, `snapshotCurrentWindow`, `compactUrl`, `stripCountPrefix`, plus all public types. Adding a new top-level function for consumers means touching this file; adding a verb does not (the public surface stays the same).
 
-The two are tightly coupled — the skill emits a DSL the runtime parses. Changes to verbs/grammar must land in `skills/tabbrew/SKILL.md`, `docs/grammar.md`, `skills/tabbrew/examples.md`, and `runtime/src/parser.ts` + `runtime/src/execute.ts` + `runtime/src/simulate.ts` in lockstep, or the model and the executor disagree.
+The first two are tightly coupled — the skill emits a DSL the runtime parses. Changes to verbs/grammar must land in `skills/tabbrew/SKILL.md`, `docs/grammar.md`, `skills/tabbrew/examples.md`, and `runtime/src/parser.ts` + `runtime/src/execute.ts` + `runtime/src/simulate.ts` in lockstep, or the model and the executor disagree.
 
 ## Commands
 

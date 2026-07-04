@@ -35,7 +35,7 @@ Prefer to install by hand?
 2. Copy the skill into Claude's skills folder:
 
    ```bash
-   cp -r tabbrew-skill/skills/tabbrew ~/.claude/skills/
+   cp -r tabbrew-skill/skills/* ~/.claude/skills/
    ```
 
    It's also a Claude Code plugin, so plugin-aware installers can load it straight from the repo.
@@ -45,6 +45,10 @@ Prefer to install by hand?
 ### Run it on your live tabs
 
 The easiest path is the **[TabBrew Chrome extension](https://chromewebstore.google.com/detail/tabbrew-tab-manager-organ/ikmpmkkcmhhnjmdiooekbhfmomcbefkf)** — it already has the skill built in. Just install it and start asking.
+
+## Bonus: send HTML docs to TabBrew
+
+The repo ships a second skill, **tabbrew-html-upload**. When Claude produces an HTML deliverable — a plan doc, a report, a data viewer — just say *"send this to TabBrew"* and it lands in the extension's sidepanel **Docs** view, openable in a tab from any machine. Uploads are authenticated with a personal token (generate one at [tabbrew.com/profile](https://www.tabbrew.com/profile)) and capped at 2 MB.
 
 ## Safe by design
 
@@ -57,12 +61,13 @@ Lots of AI browser tools work by running raw code in your browser, which is one 
 The pieces above are open source. Here's how the repo is laid out:
 
 ```
-.claude-plugin/plugin.json   # Claude Code plugin manifest
-skills/tabbrew/SKILL.md      # the Claude skill itself
-skills/tabbrew/examples.md   # 24 worked goal → script examples
-runtime/src/                 # TypeScript runtime: parse / execute / simulate / snapshot
-docs/grammar.md              # formal language reference
-docs/runtime.md              # execution model + safety properties
+.claude-plugin/plugin.json           # Claude Code plugin manifest
+skills/tabbrew/SKILL.md              # the tab-organizing skill itself
+skills/tabbrew/examples.md           # 24 worked goal → script examples
+skills/tabbrew-html-upload/SKILL.md  # skill: push HTML docs into TabBrew Docs
+runtime/src/                         # TypeScript runtime: parse / execute / simulate / snapshot
+docs/grammar.md                      # formal language reference
+docs/runtime.md                      # execution model + safety properties
 ```
 
 **The script language** — one action per line, `#` for comments:
