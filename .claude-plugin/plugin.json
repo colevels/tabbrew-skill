@@ -1,7 +1,7 @@
 {
   "name": "tabbrew",
-  "version": "0.1.2",
-  "description": "Manage Chrome tabs with TabBrew Scripts. Just say what you want — \"tidy up my tabs\", \"close duplicates\", or \"group my shopping tabs together\".",
-  "keywords": ["chrome", "tabs", "tab-management", "tabbrew", "organize-tabs", "browser"],
-  "skills": ["./skills/tabbrew"]
+  "version": "0.2.0",
+  "description": "Manage Chrome tabs with TabBrew Scripts. Just say what you want — \"tidy up my tabs\", \"close duplicates\", or \"group my shopping tabs together\". Also sends HTML docs to TabBrew: \"send this HTML to TabBrew\", \"upload this doc to TabBrew Docs\", \"push this report to tabbrew\".",
+  "keywords": ["chrome", "tabs", "tab-management", "tabbrew", "organize-tabs", "browser", "html-upload", "docs"],
+  "skills": ["./skills/tabbrew", "./skills/tabbrew-html-upload"]
 }
